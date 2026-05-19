@@ -2,7 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
+import ProductGallery from '../../components/ProductGallery.astro';
 import { products } from '../../data/products';
+import { formatPrice } from '../../lib/site';
 import {
   whatsappUrl,
   WHATSAPP_PRIMARY,
@@ -19,9 +21,13 @@ export function getStaticPaths() {
 const { product } = Astro.props;
 const waMessage = productWhatsAppMessage(product.name, product.price, product.currency);
 const waPrimary = whatsappUrl(WHATSAPP_PRIMARY, waMessage);
+const galleryImages =
+  product.gallery && product.gallery.length > 0
+    ? product.gallery
+    : [{ src: product.image, alt: product.name }];
 ---
 
-<BaseLayout title={`${product.name} — MLCAPS`} bodyClass="pt-[5rem] md:pt-[5.25rem]">
+<BaseLayout title={`${product.name} — MLCAPS`} bodyClass="pt-[var(--nav-bar-h)]">
   <Nav backHref="/" />
 
   <main
@@ -29,15 +35,9 @@ const waPrimary = whatsappUrl(WHATSAPP_PRIMARY, waMessage);
   >
     <div class="grid grid-cols-1 items-start gap-8 md:gap-12 lg:grid-cols-2 lg:gap-[48px]">
       <div
-        class="flex h-[50vh] min-h-[280px] w-full items-center justify-center bg-canvas sm:h-[55vh] lg:sticky lg:top-24 lg:h-[80vh]"
+        class="flex h-[50vh] min-h-[280px] w-full items-center justify-center bg-canvas sm:h-[55vh] lg:sticky lg:top-24 lg:min-h-[320px] lg:h-[80vh]"
       >
-        <img
-          src={product.image}
-          alt={product.name}
-          class="h-full w-full object-contain p-4 sm:p-8"
-          width="800"
-          height="800"
-        />
+        <ProductGallery images={galleryImages} productName={product.name} />
       </div>
 
       <div class="flex flex-col gap-8 md:gap-12 lg:pt-0">
@@ -48,7 +48,7 @@ const waPrimary = whatsappUrl(WHATSAPP_PRIMARY, waMessage);
             {product.name}
           </h1>
           <p class="font-headline-md text-ink">
-            ${product.price.toFixed(2)} {product.currency}
+            {formatPrice(product.price, product.currency)}
           </p>
         </div>
 
@@ -65,7 +65,7 @@ const waPrimary = whatsappUrl(WHATSAPP_PRIMARY, waMessage);
 
         <div class="grid grid-cols-1 gap-8">
           <div>
-            <h2 class="font-label-caps mb-4 tracking-widest text-ink">Description</h2>
+            <h2 class="font-label-caps mb-4 tracking-widest text-ink">Descripción</h2>
             <p class="font-body-lg leading-relaxed text-secondary">
               {product.description}
             </p>
@@ -73,13 +73,13 @@ const waPrimary = whatsappUrl(WHATSAPP_PRIMARY, waMessage);
 
           <div class="grid grid-cols-1 gap-8 border-t border-hairline pt-8 sm:grid-cols-2">
             <div>
-              <h2 class="font-label-caps mb-4 tracking-widest text-ink">Materials</h2>
+              <h2 class="font-label-caps mb-4 tracking-widest text-ink">Materiales</h2>
               <ul class="font-body-lg flex flex-col gap-2 text-secondary">
                 {product.materials.map((item) => <li>{item}</li>)}
               </ul>
             </div>
             <div>
-              <h2 class="font-label-caps mb-4 tracking-widest text-ink">Care</h2>
+              <h2 class="font-label-caps mb-4 tracking-widest text-ink">Cuidado</h2>
               <ul class="font-body-lg flex flex-col gap-2 text-secondary">
                 {product.care.map((item) => <li>{item}</li>)}
               </ul>

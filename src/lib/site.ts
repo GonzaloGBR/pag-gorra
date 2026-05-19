@@ -5,6 +5,16 @@ export const INSTAGRAM_URL =
 
 export const WHATSAPP_NAV_MESSAGE = 'Hola MLCAPS, quiero consultar por una gorra.';
 
+/** Precio legible en español (Argentina). */
+export function formatPrice(price: number, currency: string): string {
+  if (currency === 'USD') {
+    return `u$s ${price.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
+  return `${price.toLocaleString('es-AR')} ${currency}`;
+}
+
+export const FOOTER_TAGLINE = 'Gorras premium · Salta, Argentina';
+
 export const navLinks = [
   { href: '/', label: 'Colección', key: 'coleccion' as const },
   { href: '/#locales', label: 'Locales', key: null },

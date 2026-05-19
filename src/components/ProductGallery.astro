@@ -1,0 +1,175 @@
+---
+interface Props {
+  images: { src: string; alt: string }[];
+  productName: string;
+}
+
+const { images, productName } = Astro.props;
+const initial = images[0]!;
+---
+
+<div class="product-gallery" data-product-gallery>
+  <div class="product-gallery__main">
+    <img
+      data-gallery-main
+      src={initial.src}
+      alt={initial.alt}
+      class="product-gallery__img"
+      width="900"
+      height="900"
+      draggable="false"
+    />
+  </div>
+  {
+    images.length > 1 ? (
+      <ul class="product-gallery__thumbs" role="list">
+        {images.map((item, i) => (
+          <li>
+            <button
+              type="button"
+              class:list={['product-gallery__thumb', i === 0 && 'is-active']}
+              data-gallery-thumb
+              data-src={item.src}
+              data-alt={item.alt}
+              aria-label={`Ver ${item.alt}`}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+            >
+              <img
+                src={item.src}
+                alt=""
+                width="120"
+                height="120"
+                class="product-gallery__thumb-img"
+                draggable="false"
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            </button>
+          </li>
+        ))}
+      </ul>
+    ) : null
+  }
+</div>
+
+<script>
+  function initProductGallery() {
+    document.querySelectorAll<HTMLElement>('[data-product-gallery]').forEach((root) => {
+      if (root.dataset.galleryInit === 'true') return;
+      root.dataset.galleryInit = 'true';
+
+      const main = root.querySelector<HTMLImageElement>('[data-gallery-main]');
+      const thumbs = root.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]');
+      if (!main || thumbs.length === 0) return;
+
+      thumbs.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const src = btn.getAttribute('data-src');
+          const alt = btn.getAttribute('data-alt');
+          if (!src) return;
+
+          main.src = src;
+          if (alt) main.alt = alt;
+
+          thumbs.forEach((t) => {
+            const active = t === btn;
+            t.classList.toggle('is-active', active);
+            t.setAttribute('aria-pressed', String(active));
+          });
+        });
+      });
+    });
+  }
+
+  initProductGallery();
+  document.addEventListener('astro:page-load', initProductGallery);
+</script>
+
+<style>
+  .product-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+  }
+
+  .product-gallery__main {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .product-gallery__img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(58vh, 560px);
+    object-fit: contain;
+  }
+
+  .product-gallery__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0 0.25rem;
+    list-style: none;
+  }
+
+  .product-gallery__thumb {
+    flex-shrink: 0;
+    padding: 0;
+    border: 2px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    background: var(--color-canvas);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .product-gallery__thumb:hover {
+    border-color: var(--color-secondary);
+  }
+
+  .product-gallery__thumb.is-active {
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+
+  .product-gallery__thumb:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .product-gallery__thumb-img {
+    display: block;
+    width: 4rem;
+    height: 4rem;
+    object-fit: contain;
+    padding: 0.25rem;
+    pointer-events: none;
+  }
+
+  @media (min-width: 640px) {
+    .product-gallery__thumb-img {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .product-gallery__img {
+      max-height: min(68vh, 640px);
+    }
+  }
+</style>

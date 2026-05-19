@@ -18,6 +18,33 @@
 }
 
 @layer base {
+  :root {
+    --nav-logo-h: 3.5rem;
+    --nav-bar-pad: 0.25rem;
+    --nav-bar-h: calc(var(--nav-logo-h) + var(--nav-bar-pad) * 2);
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --nav-logo-h: 4.25rem;
+      --nav-bar-pad: 0.25rem;
+      --nav-bar-h: calc(var(--nav-logo-h) + var(--nav-bar-pad) * 2);
+    }
+  }
+
+  img.nav-logo {
+    width: auto;
+    max-width: min(42vw, 9rem);
+    height: var(--nav-logo-h);
+    max-height: var(--nav-logo-h);
+  }
+
+  @media (min-width: 768px) {
+    img.nav-logo {
+      max-width: 10.5rem;
+    }
+  }
+
   html {
     @apply antialiased;
   }

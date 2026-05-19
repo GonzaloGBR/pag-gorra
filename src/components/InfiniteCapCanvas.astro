@@ -38,7 +38,10 @@ const worldH = bounds.maxY - bounds.minY;
             data-slug={cap.slug}
             role="link"
             tabindex="0"
-            class="cap-item group absolute block cursor-pointer bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+            class:list={[
+              'cap-item group absolute block cursor-pointer bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink',
+              cap.featured && 'cap-item--featured',
+            ]}
             style={`left: ${cap.x}px; top: ${cap.y}px; width: ${cap.w}px; height: ${cap.h}px;`}
             aria-label={`Ver ${cap.alt}`}
           >
@@ -49,7 +52,7 @@ const worldH = bounds.maxY - bounds.minY;
                 width={cap.w}
                 height={cap.h}
                 class="pointer-events-none h-full w-full object-contain"
-                loading="lazy"
+                loading={cap.featured ? 'eager' : 'lazy'}
                 draggable="false"
               />
             </div>
@@ -79,19 +82,47 @@ const worldH = bounds.maxY - bounds.minY;
     user-select: none;
   }
 
-  .cap-item:hover,
-  .cap-item:focus-visible {
-    z-index: 10;
+  .cap-item--featured {
+    z-index: 5;
+    border-radius: 1rem;
+    outline: 2px solid #e85d04;
+    outline-offset: 5px;
+    background-color: var(--color-canvas);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cap-item--featured:hover,
+    .cap-item--featured:focus-visible {
+      z-index: 25;
+    }
   }
 
   .cap-item__visual {
     transform-origin: center center;
-    transition: transform 0.25s ease;
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: transform;
   }
 
-  .cap-item:hover .cap-item__visual,
-  .cap-item:focus-visible .cap-item__visual {
-    transform: scale(1.12);
+  /* Solo en puntero: resalta la gorra sin mover el grid */
+  @media (hover: hover) and (pointer: fine) {
+    .cap-item:hover,
+    .cap-item:focus-visible {
+      z-index: 20;
+    }
+
+    .cap-item:hover .cap-item__visual,
+    .cap-item:focus-visible .cap-item__visual {
+      transform: scale(1.28);
+    }
+  }
+
+  .canvas-viewport.is-dragging .cap-item:hover .cap-item__visual,
+  .canvas-viewport.is-dragging .cap-item:focus-visible .cap-item__visual {
+    transform: none;
+  }
+
+  .canvas-viewport.is-dragging .cap-item:hover,
+  .canvas-viewport.is-dragging .cap-item:focus-visible {
+    z-index: 1;
   }
 </style>

@@ -11,11 +11,15 @@ export interface WorldBounds {
 
 const EDGE_PADDING = 56;
 const CLICK_THRESHOLD = 10;
-/** < 1 = arrastre y rueda más lentos / suaves */
-const MOVE_SCALE = 0.78;
-/** Inercia al soltar (más alto = desliza más tiempo) */
-const FRICTION = 0.91;
-const VELOCITY_STOP = 0.35;
+/** Arrastre: menor = movimiento más pesado / lento */
+const DRAG_SCALE = 0.38;
+/** Rueda: suele mandar deltas grandes → aún más bajo que el arrastre */
+const WHEEL_SCALE = 0.3;
+/** Flechas del teclado */
+const KEY_SCALE = 0.38;
+/** Inercia al soltar (más bajo = frena antes, sensación más pesada) */
+const FRICTION = 0.86;
+const VELOCITY_STOP = 0.28;
 
 export function computeWorldBounds(placements: CapPlacement[]): WorldBounds {
   let minX = Infinity;
@@ -162,8 +166,8 @@ export function initInfiniteCanvas(
 
   const onPointerMove = (e: PointerEvent) => {
     if (!dragging || e.pointerId !== pointerId) return;
-    const dx = (e.clientX - lastX) * MOVE_SCALE;
-    const dy = (e.clientY - lastY) * MOVE_SCALE;
+    const dx = (e.clientX - lastX) * DRAG_SCALE;
+    const dy = (e.clientY - lastY) * DRAG_SCALE;
     lastX = e.clientX;
     lastY = e.clientY;
     camX -= dx;
@@ -201,18 +205,24 @@ export function initInfiniteCanvas(
     }
   };
 
+  const wheelDelta = (value: number, mode: number) => {
+    if (mode === WheelEvent.DOM_DELTA_LINE) return value * 16;
+    if (mode === WheelEvent.DOM_DELTA_PAGE) return value * viewport.clientHeight * 0.85;
+    return value;
+  };
+
   const onWheel = (e: WheelEvent) => {
     e.preventDefault();
     cancelAnimationFrame(raf);
     velX = 0;
     velY = 0;
-    camX += e.deltaX * MOVE_SCALE;
-    camY += e.deltaY * MOVE_SCALE;
+    camX += wheelDelta(e.deltaX, e.deltaMode) * WHEEL_SCALE;
+    camY += wheelDelta(e.deltaY, e.deltaMode) * WHEEL_SCALE;
     clampAndApply();
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    const step = (e.shiftKey ? 120 : 48) * MOVE_SCALE;
+    const step = (e.shiftKey ? 120 : 48) * KEY_SCALE;
     let handled = false;
     if (e.key === 'ArrowLeft') {
       camX -= step;

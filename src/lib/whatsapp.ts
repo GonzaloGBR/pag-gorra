@@ -7,5 +7,9 @@ export function whatsappUrl(phone: string, message: string): string {
 }
 
 export function productWhatsAppMessage(productName: string, price: number, currency: string): string {
-  return `Hola MLCAPS, quiero comprar: ${productName} ($${price.toFixed(2)} ${currency})`;
+  const precio =
+    currency === 'USD'
+      ? `u$s ${price.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`
+      : `${price} ${currency}`;
+  return `Hola MLCAPS, quiero comprar la gorra ${productName} (${precio}).`;
 }

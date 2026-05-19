@@ -4,99 +4,195 @@ export interface Product {
   price: number;
   currency: string;
   image: string;
+  /** Fotos extra para la ficha (incluye o repite la principal). */
+  gallery?: { src: string; alt: string }[];
+  /** Destacada en el centro del catálogo infinito. */
+  featured?: boolean;
   description: string;
   materials: string[];
   care: string[];
 }
 
+const GOKU_BASE = '/images/caps/goku-capslab';
+
 export const products: Product[] = [
   {
+    slug: 'goku-capslab',
+    name: 'GOKU CAPSLAB',
+    price: 55,
+    currency: 'USD',
+    image: `${GOKU_BASE}/01-front.png`,
+    featured: true,
+    gallery: [
+      { src: `${GOKU_BASE}/01-front.png`, alt: 'Vista frontal' },
+      { src: `${GOKU_BASE}/02-front-angle.png`, alt: 'Vista diagonal' },
+      { src: `${GOKU_BASE}/03-back-angle.png`, alt: 'Vista trasera' },
+      { src: `${GOKU_BASE}/04-side.png`, alt: 'Vista lateral' },
+    ],
+    description:
+      'Trucker CAPSLAB x Dragon Ball: panel frontal navy, malla naranja, parche bordado de Goku y visera con costura contrastada.',
+    materials: [
+      'Frente en twill de algodón',
+      'Malla trasera en poliéster',
+      'Parche bordado en el frente',
+      'Cierre snapback ajustable',
+    ],
+    care: [
+      'Limpieza localizada en el parche',
+      'No sumergir la malla',
+      'Secar a la sombra',
+    ],
+  },
+  {
     slug: 'apex-blackout',
-    name: 'THE APEX BLACKOUT',
+    name: 'APEX BLACKOUT',
     price: 45,
     currency: 'USD',
     image: '/images/caps/black-baseball.png',
     description:
-      'Engineered for minimalists. The Apex Blackout is constructed with precision-milled twill and features an unstructured crown for a perfectly relaxed fit. Designed to be a silent staple in your daily uniform.',
-    materials: ['100% Cotton Twill', 'Matte Black Hardware', 'Tonal Embroidery'],
-    care: ['Hand wash cold', 'Do not bleach', 'Line dry in shade'],
+      'Gorra negra de perfil bajo, sin estructura rígida en la corona. Tela twill de algodón con terminaciones mate. Pensada para el día a día sin logos ni distracciones.',
+    materials: [
+      'Twill de algodón 100 %',
+      'Cierre y hebillas en negro mate',
+      'Bordado tonal discreto',
+    ],
+    care: [
+      'Lavado a mano con agua fría',
+      'No usar blanqueador',
+      'Secar a la sombra',
+    ],
   },
   {
     slug: 'coastal-navy',
-    name: 'COASTAL NAVY TRUCKER',
+    name: 'NAVY COSTERA',
     price: 42,
     currency: 'USD',
     image: '/images/caps/navy-trucker.png',
     description:
-      'Deep navy twill with a structured crown and breathable mesh back. Built for long days and clean lines—no logos, no noise.',
-    materials: ['Cotton Twill Front', 'Poly Mesh Back', 'Adjustable Snap'],
-    care: ['Spot clean', 'Air dry', 'Do not iron brim'],
+      'Trucker en azul marino con frente de twill y red trasera transpirable. Corona con algo más de estructura para un perfil definido.',
+    materials: [
+      'Frente en twill de algodón',
+      'Red de poliéster en la parte trasera',
+      'Cierre ajustable con broche',
+    ],
+    care: [
+      'Limpieza localizada con paño húmedo',
+      'Secar al aire',
+      'No planchar la visera',
+    ],
   },
   {
     slug: 'vintage-sand',
-    name: 'VINTAGE SAND CAP',
+    name: 'ARENA VINTAGE',
     price: 40,
     currency: 'USD',
     image: '/images/caps/beige-vintage.png',
     description:
-      'Sun-washed beige with a low profile and soft unstructured fit. Feels broken-in from day one.',
-    materials: ['Washed Cotton Canvas', 'Tonal Stitching', 'Metal Buckle'],
-    care: ['Hand wash cold', 'Reshape while damp', 'Dry flat'],
+      'Tono arena lavado, visera curva y calce relajado. La sensación es de una gorra ya usada, sin rigidez excesiva.',
+    materials: [
+      'Lona de algodón lavada',
+      'Costuras en tono',
+      'Hebilla metálica',
+    ],
+    care: [
+      'Lavado a mano en frío',
+      'Reacomodar la forma húmeda',
+      'Secar en horizontal',
+    ],
   },
   {
     slug: 'minimal-white',
-    name: 'MINIMAL WHITE',
+    name: 'BLANCA MÍNIMA',
     price: 38,
     currency: 'USD',
     image: '/images/caps/white-minimal.png',
     description:
-      'Crisp white canvas, micro logo, maximum negative space. The cap for editors and athletes alike.',
-    materials: ['Heavyweight Cotton', 'Embroidered Mark', 'Curved Brim'],
-    care: ['Hand wash only', 'No bleach', 'Line dry'],
+      'Blanco limpio, marca mínima y mucho espacio visual. Una pieza neutra que combina con cualquier look urbano o deportivo.',
+    materials: [
+      'Algodón pesado',
+      'Marca bordada pequeña',
+      'Visera curva',
+    ],
+    care: [
+      'Solo lavado a mano',
+      'Sin blanqueador',
+      'Secar colgada a la sombra',
+    ],
   },
   {
     slug: 'delimited-run',
-    name: 'DELIMITED RUN 01',
+    name: 'EDICIÓN DELIMITADA 01',
     price: 52,
     currency: 'USD',
     image: '/images/caps/navy-trucker.png',
     description:
-      'Numbered drop with contrast under-brim and interior taping. Once the run ends, the grid goes dark.',
-    materials: ['Double-layer Twill', 'Numbered Interior Label', 'Suede Visor'],
-    care: ['Dry clean only', 'Store on crown', 'Keep away from moisture'],
+      'Serie numerada con detalle en el interior de la visera y cinta interna contrastada. Cuando se agota el lote, no se repone.',
+    materials: [
+      'Doble capa de twill',
+      'Etiqueta interior numerada',
+      'Visera en gamuza',
+    ],
+    care: [
+      'Lavado en seco recomendado',
+      'Guardar apoyada en la corona',
+      'Evitar humedad prolongada',
+    ],
   },
   {
     slug: 'studio-grey',
-    name: 'STUDIO GREY FIELD',
+    name: 'GRIS ESTUDIO',
     price: 44,
     currency: 'USD',
     image: '/images/caps/beige-vintage.png',
     description:
-      'Neutral grey tuned for product photography—and for disappearing into your rotation.',
-    materials: ['Brushed Cotton', 'Tonal Eyelets', 'Soft Buckle'],
-    care: ['Machine wash cold', 'Gentle cycle', 'Tumble dry low'],
+      'Gris neutro pensado para resaltar la forma del producto en foto y en uso. Encaja en rotaciones discretas sin robar protagonismo.',
+    materials: [
+      'Algodón cepillado',
+      'Ojales en tono',
+      'Hebilla suave al tacto',
+    ],
+    care: [
+      'Lavado a máquina en frío, ciclo suave',
+      'Secado en secarropas bajo',
+    ],
   },
   {
     slug: 'trail-ink',
-    name: 'TRAIL INK PERFORMANCE',
+    name: 'TRAIL INK',
     price: 48,
     currency: 'USD',
     image: '/images/caps/black-baseball.png',
     description:
-      'Lightweight black ripstop with laser-cut vents. Made to move, not to shout.',
-    materials: ['Ripstop Nylon', 'Laser Perforation', 'Reflective Tag'],
-    care: ['Wipe clean', 'Do not machine wash', 'Air dry'],
+      'Ripstop negro liviano con ventilación láser. Pensada para moverse: poco peso, secado rápido, estética técnica sin exceso de branding.',
+    materials: [
+      'Nylon ripstop',
+      'Perforaciones láser',
+      'Etiqueta reflectiva pequeña',
+    ],
+    care: [
+      'Limpiar con paño húmedo',
+      'No lavar a máquina',
+      'Secar al aire libre',
+    ],
   },
   {
     slug: 'archive-cream',
-    name: 'ARCHIVE CREAM',
+    name: 'ARCHIVO CREMA',
     price: 41,
     currency: 'USD',
     image: '/images/caps/white-minimal.png',
     description:
-      'Archived colorway brought back for the infinite canvas. Cream crown, raw brim edge.',
-    materials: ['Organic Cotton', 'Raw Edge Brim', 'Woven Label'],
-    care: ['Hand wash', 'Use mild detergent', 'Dry in shade'],
+      'Color archivo recuperado para el catálogo: corona crema y borde de visera sin rematar. Edición con carácter vintage contemporáneo.',
+    materials: [
+      'Algodón orgánico',
+      'Borde de visera en crudo',
+      'Etiqueta tejida',
+    ],
+    care: [
+      'Lavado a mano',
+      'Detergente suave',
+      'Secar a la sombra',
+    ],
   },
 ];
 
@@ -105,10 +201,10 @@ export function getProductBySlug(slug: string): Product | undefined {
 }
 
 export const capImages = [
-  { file: 'navy-trucker.png', alt: 'Gorra trucker navy' },
-  { file: 'beige-vintage.png', alt: 'Gorra vintage beige' },
-  { file: 'white-minimal.png', alt: 'Gorra blanca minimal' },
-  { file: 'black-baseball.png', alt: 'Gorra negra premium' },
+  { file: 'navy-trucker.png', alt: 'Gorra trucker azul marino' },
+  { file: 'beige-vintage.png', alt: 'Gorra beige estilo vintage' },
+  { file: 'white-minimal.png', alt: 'Gorra blanca minimalista' },
+  { file: 'black-baseball.png', alt: 'Gorra negra tipo baseball' },
 ] as const;
 
 /** Genera muchas posiciones en una malla con espaciado y límites naturales. */
@@ -123,6 +219,10 @@ export function buildCapPlacements() {
   const ORIGIN_Y = 100;
   const STAGGER_X = 50;
 
+  const featured = products.find((p) => p.featured);
+  const CENTER_ROW = Math.floor(ROWS / 2);
+  const CENTER_COL = Math.floor(COLS / 2);
+
   const placements: Array<{
     id: string;
     slug: string;
@@ -132,26 +232,30 @@ export function buildCapPlacements() {
     h: number;
     image: string;
     alt: string;
+    featured?: boolean;
   }> = [];
 
   let index = 0;
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
+      const isCenter = row === CENTER_ROW && col === CENTER_COL;
       const img = capImages[index % capImages.length];
-      const product = products[index % products.length];
+      const product = isCenter && featured ? featured : products[index % products.length];
       const x =
         ORIGIN_X + col * CELL_W + (row % 2 === 1 ? STAGGER_X : 0) + ((index * 17) % 24) - 12;
       const y = ORIGIN_Y + row * CELL_H + ((index * 13) % 20) - 10;
+      const isFeatured = Boolean(isCenter && featured);
 
       placements.push({
         id: `cap-${row}-${col}`,
         slug: product.slug,
         x,
         y,
-        w: HAT_W,
-        h: HAT_H,
-        image: `/images/caps/${img.file}`,
-        alt: img.alt,
+        w: isFeatured ? HAT_W + 24 : HAT_W,
+        h: isFeatured ? HAT_H + 24 : HAT_H,
+        image: isFeatured && featured ? featured.image : `/images/caps/${img.file}`,
+        alt: isFeatured ? `${product.name} — vista frontal` : `${product.name} — ${img.alt}`,
+        featured: isFeatured,
       });
       index++;
     }

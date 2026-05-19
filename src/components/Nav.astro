@@ -13,91 +13,76 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
 ---
 
 <nav
-  class="nav-root fixed top-0 left-0 z-50 w-full border-b border-hairline/50 bg-canvas/70 backdrop-blur-lg"
+  class="nav-root fixed top-0 left-0 z-50 w-full border-b border-hairline/50 bg-canvas/80 backdrop-blur-sm"
   aria-label="Principal"
 >
-  <div class="nav-bar grid min-h-[5rem] h-[5rem] grid-cols-[minmax(2.75rem,1fr)_minmax(min-content,max-content)_minmax(2.75rem,1fr)] items-center px-margin-mobile md:h-[5.25rem] md:min-h-[5.25rem] md:px-margin-desktop">
-    <!-- Desktop: enlaces izquierda | Mobile: volver atrás si aplica -->
-    <div class="flex min-w-0 items-center gap-4 md:gap-6">
-      {
-        backHref ? (
-          <a
-            href={backHref}
-            class="font-label-caps text-ink transition-opacity hover:opacity-70 md:hidden"
-          >
-            ← Colección
-          </a>
-        ) : null
-      }
-      <div class="hidden min-w-0 items-center gap-4 md:flex md:gap-6">
+  <div
+    class="nav-bar px-margin-mobile md:px-margin-desktop"
+  >
+    <div class="nav-side nav-side--left">
+      <div
+        class:list={[
+          'nav-side__links',
+          backHref ? 'nav-side__links--product' : 'nav-side__links--home',
+        ]}
+      >
         {
-          backHref ? (
-            <a
-              href={backHref}
-              class="font-label-caps text-ink transition-opacity hover:opacity-70"
-            >
-              ← Colección
-            </a>
-          ) : (
-            <a
-              href="/"
-              class:list={[
-                'font-label-caps pb-0.5 transition-opacity',
-                active === 'coleccion'
-                  ? 'border-b-2 border-ink text-ink'
-                  : 'text-secondary hover:opacity-70',
-              ]}
-            >
-              Colección
-            </a>
-          )
+          navLinks.map((link) => {
+            const isActive = !backHref && link.key === 'coleccion' && active === 'coleccion';
+            const href = backHref && link.key === 'coleccion' ? backHref : link.href;
+            const isBack = Boolean(backHref && link.key === 'coleccion');
+            const isDesktopOnly = Boolean(backHref && link.key !== 'coleccion');
+
+            return (
+              <a
+                href={href}
+                class:list={[
+                  'nav-pill',
+                  isBack && 'nav-pill--back',
+                  isActive && 'nav-pill--active',
+                  isDesktopOnly && 'nav-pill--desktop-only',
+                ]}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {isBack ? (
+                  <>
+                    <span class="nav-pill__icon" aria-hidden="true">←</span>
+                    <span class="nav-pill__label">Colección</span>
+                  </>
+                ) : (
+                  <span class="nav-pill__label">{link.label}</span>
+                )}
+              </a>
+            );
+          })
         }
-        <a
-          href="/#locales"
-          class="font-label-caps text-secondary transition-opacity hover:text-ink hover:opacity-70"
-        >
-          Locales
-        </a>
-        <a
-          href="/#contacto"
-          class="font-label-caps text-secondary transition-opacity hover:text-ink hover:opacity-70"
-        >
-          Contacto
-        </a>
       </div>
     </div>
 
-    <!-- Logo centrado: columna central con altura completa para que el logo crezca -->
-    <div class="flex h-full min-w-0 items-center justify-center justify-self-center self-stretch py-1">
-      <a
-        href="/"
-        class="flex h-full max-h-full items-center justify-center"
-        aria-label="MLCAPS — inicio"
-      >
+    <a href="/" class="nav-logo-link" aria-label="MLCAPS — inicio">
         <img
           src="/images/mlcaps-logo.png"
           alt="ML CAPS"
-          width="82"
-          height="102"
+          width="347"
+          height="381"
           class="nav-logo"
+          decoding="async"
         />
-      </a>
-    </div>
+    </a>
 
-    <!-- Derecha: WhatsApp + hamburguesa (móvil) -->
-    <div class="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
+    <div class="nav-side nav-side--right">
       <a
         href={whatsappComprar}
         target="_blank"
         rel="noopener noreferrer"
-        class="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-ink transition-opacity hover:opacity-70 md:h-10 md:w-10"
+        class="nav-action-btn nav-whatsapp-desktop flex items-center justify-center rounded-full border border-ink text-ink transition-opacity hover:opacity-70"
         aria-label="Comprar por WhatsApp"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          class="h-5 w-5 md:h-[1.35rem] md:w-[1.35rem]"
+          class="nav-action-btn__icon"
           aria-hidden="true"
         >
           <path
@@ -109,7 +94,7 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
       <button
         type="button"
         id="nav-menu-btn"
-        class="nav-menu-btn flex h-11 w-11 items-center justify-center rounded-full border border-hairline text-ink transition-opacity hover:opacity-70 md:hidden"
+        class="nav-menu-btn nav-action-btn flex items-center justify-center rounded-full border border-hairline text-ink transition-opacity hover:opacity-70 md:hidden"
         aria-expanded="false"
         aria-controls="nav-mobile-menu"
         aria-label="Abrir menú de navegación"
@@ -134,7 +119,7 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
   <!-- Panel móvil -->
   <div
     id="nav-mobile-menu"
-    class="nav-mobile-menu border-t border-hairline/50 bg-canvas/95 backdrop-blur-lg md:hidden"
+    class="nav-mobile-menu border-t border-hairline/50 bg-canvas/95 backdrop-blur-sm md:hidden"
     role="dialog"
     aria-modal="true"
     aria-label="Menú de navegación"
@@ -142,7 +127,7 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
     inert
   >
     <div class="nav-mobile-menu__inner px-margin-mobile py-4">
-      <ul class="flex flex-col gap-1">
+      <ul class="flex flex-col gap-2">
         {
           navLinks.map((link) => {
             const isActive = !backHref && link.key === 'coleccion' && active === 'coleccion';
@@ -156,11 +141,10 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
                   href={href}
                   data-nav-mobile-link
                   class:list={[
-                    'flex min-h-11 items-center rounded-sm px-2 font-label-caps transition-opacity',
-                    isActive
-                      ? 'text-ink'
-                      : 'text-secondary hover:text-ink hover:opacity-70',
+                    'nav-pill nav-pill--mobile',
+                    isActive && 'nav-pill--active',
                   ]}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   {label}
                 </a>
@@ -174,36 +158,218 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
 </nav>
 
 <style>
+  .nav-root {
+    --nav-side-h: calc(var(--nav-logo-h) * 0.8);
+  }
+
   .nav-bar {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    height: var(--nav-bar-h);
+    min-height: var(--nav-bar-h);
+    max-height: var(--nav-bar-h);
+    overflow: hidden;
+  }
+
+  .nav-side {
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    gap: 0.5rem;
+  }
+
+  .nav-side--left {
+    justify-content: flex-start;
+  }
+
+  .nav-side--right {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .nav-side__links {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-side__links--product {
+    display: flex;
+  }
+
+  @media (min-width: 768px) {
+    .nav-side__links--home {
+      display: flex;
+    }
+  }
+
+  .nav-whatsapp-desktop {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .nav-whatsapp-desktop {
+      display: flex;
+    }
+  }
+
+  .nav-action-btn {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    width: var(--nav-side-h);
+    height: var(--nav-side-h);
+    min-width: var(--nav-side-h);
+    min-height: var(--nav-side-h);
+    max-width: var(--nav-side-h);
+    max-height: var(--nav-side-h);
+  }
+
+  .nav-action-btn__icon {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  /* Enlaces Colección / Locales / Contacto */
+  .nav-pill {
+    position: relative;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    height: var(--nav-side-h);
     min-height: 0;
+    max-height: var(--nav-side-h);
+    padding: 0 0.875rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    background-color: transparent;
+    transition: color 0.28s var(--nav-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+
+  .nav-pill__label {
+    display: inline-block;
+    transform-origin: center center;
+    transition:
+      transform 0.28s var(--nav-ease-out, cubic-bezier(0.32, 0.72, 0, 1)),
+      color 0.28s var(--nav-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+
+  .nav-pill__icon {
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nav-pill:not(.nav-pill--active):hover {
+      color: var(--color-ink);
+    }
+
+    .nav-pill:hover .nav-pill__label {
+      transform: scale(1.1);
+    }
+
+    .nav-pill--active:hover {
+      color: var(--color-canvas);
+    }
+  }
+
+  .nav-pill:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  .nav-pill--active {
+    color: var(--color-canvas);
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    box-shadow: 0 4px 12px rgb(17 17 17 / 0.12);
+  }
+
+  .nav-pill--back {
+    color: var(--color-ink);
+    border-color: var(--color-hairline);
+    background-color: rgb(255 255 255 / 0.6);
+  }
+
+  @media (max-width: 767px) {
+    .nav-pill--desktop-only {
+      display: none;
+    }
+  }
+
+  .nav-pill--mobile {
+    width: 100%;
+    justify-content: flex-start;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-pill,
+    .nav-pill__label {
+      transition-duration: 0.01ms;
+    }
+
+    .nav-pill:hover .nav-pill__label {
+      transform: none;
+    }
+  }
+
+  .nav-logo-link {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    transform: translate(-50%, -50%);
+    transition: transform 0.28s var(--nav-ease-out, cubic-bezier(0.32, 0.72, 0, 1));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nav-logo-link:hover {
+      transform: translate(-50%, -50%) scale(1.04);
+    }
   }
 
   .nav-logo {
+    display: block;
     width: auto;
-    min-height: 3.25rem;
-    height: calc(var(--nav-bar-h) - 1rem);
-    max-height: calc(100% - 0.5rem);
+    height: var(--nav-logo-h);
+    max-width: min(42vw, 9rem);
     object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgb(17 17 17 / 0.08));
   }
 
   @media (min-width: 768px) {
     .nav-logo {
-      height: 5rem;
-      max-height: calc(100% - 0.5rem);
+      max-width: 10.5rem;
     }
   }
 
   .nav-root {
-    --nav-bar-h: 5rem;
     --nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
     --nav-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
     --nav-duration: 360ms;
-  }
-
-  @media (min-width: 768px) {
-    .nav-root {
-      --nav-bar-h: 5.25rem;
-    }
   }
 
   /* Hamburguesa → X */
@@ -260,6 +426,10 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
 
   /* Panel slide + fade */
   .nav-mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;

@@ -21,6 +21,14 @@ npm run build
 npm run preview
 ```
 
+## Despliegue en Vercel
+
+1. Importa el repositorio [github.com/GonzaloGBR/pag-gorra](https://github.com/GonzaloGBR/pag-gorra) en [Vercel](https://vercel.com/new).
+2. Vercel detecta **Astro** automáticamente (`vercel.json` ya define build y salida).
+3. **Build command:** `npm run build` · **Output directory:** `dist` · **Node.js:** 22.x (`.node-version`).
+
+No hace falta variables de entorno para el sitio estático actual. Tras el deploy, las rutas `/` y `/producto/*` funcionan como en build local.
+
 ## Estructura
 
 ```

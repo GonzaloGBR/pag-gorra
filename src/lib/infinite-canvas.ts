@@ -11,9 +11,11 @@ export interface WorldBounds {
 
 const EDGE_PADDING = 56;
 const CLICK_THRESHOLD = 10;
-const FRICTION = 0.89;
-const CAMERA_LERP = 0.14;
-const VELOCITY_STOP = 0.25;
+/** < 1 = arrastre y rueda más lentos / suaves */
+const MOVE_SCALE = 0.78;
+/** Inercia al soltar (más alto = desliza más tiempo) */
+const FRICTION = 0.91;
+const VELOCITY_STOP = 0.35;
 
 export function computeWorldBounds(placements: CapPlacement[]): WorldBounds {
   let minX = Infinity;
@@ -75,8 +77,6 @@ export function initInfiniteCanvas(
   const bounds = computeWorldBounds(placements);
   let camX = 0;
   let camY = 0;
-  let displayX = 0;
-  let displayY = 0;
   let dragging = false;
   let pointerId: number | null = null;
   let lastX = 0;
@@ -86,79 +86,40 @@ export function initInfiniteCanvas(
   let velX = 0;
   let velY = 0;
   let raf = 0;
-  let animating = false;
 
   const applyTransform = () => {
-    world.style.transform = `translate3d(${-displayX}px, ${-displayY}px, 0)`;
+    world.style.transform = `translate3d(${-camX}px, ${-camY}px, 0)`;
   };
 
-  const syncDisplayToCamera = () => {
-    displayX = camX;
-    displayY = camY;
-    applyTransform();
-  };
-
-  const clampAndSetCamera = () => {
+  const clampAndApply = () => {
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
     const clamped = clampCamera(camX, camY, vw, vh, bounds);
     camX = clamped.x;
     camY = clamped.y;
-  };
-
-  const tickSmooth = () => {
-    if (
-      !dragging &&
-      (Math.abs(velX) > VELOCITY_STOP || Math.abs(velY) > VELOCITY_STOP)
-    ) {
-      camX += velX;
-      camY += velY;
-      velX *= FRICTION;
-      velY *= FRICTION;
-      clampAndSetCamera();
-    }
-
-    const dx = camX - displayX;
-    const dy = camY - displayY;
-
-    if (dragging) {
-      displayX = camX;
-      displayY = camY;
-    } else {
-      displayX += dx * CAMERA_LERP;
-      displayY += dy * CAMERA_LERP;
-      if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
-        displayX = camX;
-        displayY = camY;
-      }
-    }
-
     applyTransform();
-
-    const stillMoving =
-      dragging ||
-      Math.abs(camX - displayX) > 0.05 ||
-      Math.abs(camY - displayY) > 0.05 ||
-      Math.abs(velX) > VELOCITY_STOP ||
-      Math.abs(velY) > VELOCITY_STOP;
-
-    if (stillMoving) {
-      raf = requestAnimationFrame(tickSmooth);
-    } else {
-      animating = false;
-    }
   };
 
-  const ensureAnimation = () => {
-    if (!animating) {
-      animating = true;
-      raf = requestAnimationFrame(tickSmooth);
+  const tickInertia = () => {
+    if (dragging) return;
+
+    if (Math.abs(velX) < VELOCITY_STOP && Math.abs(velY) < VELOCITY_STOP) {
+      velX = 0;
+      velY = 0;
+      return;
     }
+
+    camX += velX;
+    camY += velY;
+    velX *= FRICTION;
+    velY *= FRICTION;
+    clampAndApply();
+    raf = requestAnimationFrame(tickInertia);
   };
 
-  const applyCamera = () => {
-    clampAndSetCamera();
-    ensureAnimation();
+  const startInertia = () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(tickInertia);
   };
 
   const centerCamera = () => {
@@ -168,12 +129,12 @@ export function initInfiniteCanvas(
     const worldH = bounds.maxY - bounds.minY;
     camX = bounds.minX + Math.max(0, (worldW - vw) / 2);
     camY = bounds.minY + Math.max(0, (worldH - vh) / 2);
-    syncDisplayToCamera();
+    clampAndApply();
   };
 
   centerCamera();
 
-  const resize = () => applyCamera();
+  const resize = () => clampAndApply();
 
   const navigateToCapAt = (clientX: number, clientY: number) => {
     const el = document.elementFromPoint(clientX, clientY);
@@ -186,6 +147,7 @@ export function initInfiniteCanvas(
 
   const onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0) return;
+    cancelAnimationFrame(raf);
     dragging = true;
     pointerId = e.pointerId;
     lastX = e.clientX;
@@ -196,21 +158,19 @@ export function initInfiniteCanvas(
     velY = 0;
     viewport.setPointerCapture(e.pointerId);
     viewport.classList.add('is-dragging');
-    ensureAnimation();
   };
 
   const onPointerMove = (e: PointerEvent) => {
     if (!dragging || e.pointerId !== pointerId) return;
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
+    const dx = (e.clientX - lastX) * MOVE_SCALE;
+    const dy = (e.clientY - lastY) * MOVE_SCALE;
     lastX = e.clientX;
     lastY = e.clientY;
     camX -= dx;
     camY -= dy;
     velX = -dx;
     velY = -dy;
-    clampAndSetCamera();
-    ensureAnimation();
+    clampAndApply();
   };
 
   const endDrag = (e: PointerEvent) => {
@@ -226,9 +186,9 @@ export function initInfiniteCanvas(
       navigateToCapAt(e.clientX, e.clientY);
       velX = 0;
       velY = 0;
+    } else {
+      startInertia();
     }
-
-    ensureAnimation();
   };
 
   const onCapKeyDown = (e: KeyboardEvent) => {
@@ -243,15 +203,16 @@ export function initInfiniteCanvas(
 
   const onWheel = (e: WheelEvent) => {
     e.preventDefault();
-    camX += e.deltaX;
-    camY += e.deltaY;
+    cancelAnimationFrame(raf);
     velX = 0;
     velY = 0;
-    applyCamera();
+    camX += e.deltaX * MOVE_SCALE;
+    camY += e.deltaY * MOVE_SCALE;
+    clampAndApply();
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    const step = e.shiftKey ? 120 : 48;
+    const step = (e.shiftKey ? 120 : 48) * MOVE_SCALE;
     let handled = false;
     if (e.key === 'ArrowLeft') {
       camX -= step;
@@ -273,7 +234,7 @@ export function initInfiniteCanvas(
       e.preventDefault();
       velX = 0;
       velY = 0;
-      applyCamera();
+      clampAndApply();
     }
   };
 

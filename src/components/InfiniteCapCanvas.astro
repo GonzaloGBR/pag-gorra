@@ -67,15 +67,30 @@ const worldH = bounds.maxY - bounds.minY;
   import { initInfiniteCanvas } from '../lib/infinite-canvas';
   import { buildCapPlacements } from '../data/products';
 
-  const root = document.getElementById('infinite-canvas');
-  if (root) {
+  function initCanvas() {
+    const root = document.getElementById('infinite-canvas');
+    if (!root || root.dataset.canvasInit === 'true') return;
+    root.dataset.canvasInit = 'true';
+
     const placements = buildCapPlacements();
     const cleanup = initInfiniteCanvas(root, placements);
-    document.addEventListener('astro:before-swap', cleanup, { once: true });
+
+    const onBeforeSwap = () => {
+      cleanup();
+      document.removeEventListener('astro:before-swap', onBeforeSwap);
+    };
+    document.addEventListener('astro:before-swap', onBeforeSwap);
   }
+
+  initCanvas();
+  document.addEventListener('astro:page-load', initCanvas);
 </script>
 
 <style>
+  .canvas-viewport {
+    touch-action: none;
+  }
+
   .cap-item {
     z-index: 1;
     -webkit-user-drag: none;

@@ -90,6 +90,12 @@ export function initInfiniteCanvas(
   let velX = 0;
   let velY = 0;
   let raf = 0;
+  let animating = false;
+  /** Evita recentrar la cámara por focus tras arrastrar o usar rueda. */
+  let blockFocusPanUntil = 0;
+  let wheelAccumX = 0;
+  let wheelAccumY = 0;
+  let wheelRaf = 0;
 
   const applyTransform = () => {
     world.style.transform = `translate3d(${-camX}px, ${-camY}px, 0)`;
@@ -98,32 +104,44 @@ export function initInfiniteCanvas(
   const clampAndApply = () => {
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
+    const beforeX = camX;
+    const beforeY = camY;
     const clamped = clampCamera(camX, camY, vw, vh, bounds);
+    if (clamped.x !== beforeX) velX = 0;
+    if (clamped.y !== beforeY) velY = 0;
     camX = clamped.x;
     camY = clamped.y;
     applyTransform();
   };
 
-  const tickInertia = () => {
-    if (dragging) return;
-
-    if (Math.abs(velX) < VELOCITY_STOP && Math.abs(velY) < VELOCITY_STOP) {
-      velX = 0;
-      velY = 0;
-      return;
+  const frame = () => {
+    if (!dragging) {
+      if (Math.abs(velX) < VELOCITY_STOP && Math.abs(velY) < VELOCITY_STOP) {
+        velX = 0;
+        velY = 0;
+        animating = false;
+        return;
+      }
+      camX += velX;
+      camY += velY;
+      velX *= FRICTION;
+      velY *= FRICTION;
     }
-
-    camX += velX;
-    camY += velY;
-    velX *= FRICTION;
-    velY *= FRICTION;
     clampAndApply();
-    raf = requestAnimationFrame(tickInertia);
+    if (animating) raf = requestAnimationFrame(frame);
   };
 
-  const startInertia = () => {
+  const startAnimation = () => {
+    if (animating) return;
+    animating = true;
     cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(tickInertia);
+    raf = requestAnimationFrame(frame);
+  };
+
+  const stopAnimation = () => {
+    animating = false;
+    cancelAnimationFrame(raf);
+    raf = 0;
   };
 
   const centerCamera = () => {
@@ -149,9 +167,21 @@ export function initInfiniteCanvas(
     }
   };
 
+  const blurFocusedCap = () => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.closest('[data-cap-item]')) {
+      active.blur();
+    }
+  };
+
   const onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0) return;
-    cancelAnimationFrame(raf);
+    stopAnimation();
+    cancelAnimationFrame(wheelRaf);
+    wheelAccumX = 0;
+    wheelAccumY = 0;
+    blockFocusPanUntil = performance.now() + 600;
+    blurFocusedCap();
     dragging = true;
     pointerId = e.pointerId;
     lastX = e.clientX;
@@ -186,12 +216,14 @@ export function initInfiniteCanvas(
     viewport.releasePointerCapture(e.pointerId);
     viewport.classList.remove('is-dragging');
 
+    blockFocusPanUntil = performance.now() + 600;
+
     if (moved < CLICK_THRESHOLD) {
       navigateToCapAt(e.clientX, e.clientY);
       velX = 0;
       velY = 0;
     } else {
-      startInertia();
+      startAnimation();
     }
   };
 
@@ -211,14 +243,27 @@ export function initInfiniteCanvas(
     return value;
   };
 
-  const onWheel = (e: WheelEvent) => {
-    e.preventDefault();
-    cancelAnimationFrame(raf);
+  const flushWheel = () => {
+    wheelRaf = 0;
+    if (wheelAccumX === 0 && wheelAccumY === 0) return;
+    stopAnimation();
     velX = 0;
     velY = 0;
-    camX += wheelDelta(e.deltaX, e.deltaMode) * WHEEL_SCALE;
-    camY += wheelDelta(e.deltaY, e.deltaMode) * WHEEL_SCALE;
+    camX += wheelAccumX;
+    camY += wheelAccumY;
+    wheelAccumX = 0;
+    wheelAccumY = 0;
+    blockFocusPanUntil = performance.now() + 400;
     clampAndApply();
+  };
+
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    wheelAccumX += wheelDelta(e.deltaX, e.deltaMode) * WHEEL_SCALE;
+    wheelAccumY += wheelDelta(e.deltaY, e.deltaMode) * WHEEL_SCALE;
+    if (!wheelRaf) {
+      wheelRaf = requestAnimationFrame(flushWheel);
+    }
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -248,23 +293,61 @@ export function initInfiniteCanvas(
     }
   };
 
+  const onFocusIn = (e: FocusEvent) => {
+    if (performance.now() < blockFocusPanUntil || dragging) return;
+
+    const cap = (e.target as HTMLElement).closest<HTMLElement>('[data-cap-item]');
+    if (!cap) return;
+
+    // Solo Tab/teclado: un clic no debe saltar la cámara.
+    if (!cap.matches(':focus-visible')) return;
+
+    stopAnimation();
+    velX = 0;
+    velY = 0;
+
+    const capX = cap.offsetLeft;
+    const capY = cap.offsetTop;
+    const capW = cap.offsetWidth;
+    const capH = cap.offsetHeight;
+
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+
+    camX = capX + capW / 2 - vw / 2;
+    camY = capY + capH / 2 - vh / 2;
+    clampAndApply();
+  };
+
+  const onMouseDown = (e: MouseEvent) => {
+    if (e.button !== 0) return;
+    const cap = (e.target as HTMLElement).closest('[data-cap-item]');
+    if (cap) e.preventDefault();
+  };
+
+  viewport.addEventListener('mousedown', onMouseDown, true);
   viewport.addEventListener('pointerdown', onPointerDown);
   viewport.addEventListener('pointermove', onPointerMove);
   viewport.addEventListener('pointerup', endDrag);
   viewport.addEventListener('pointercancel', endDrag);
   viewport.addEventListener('wheel', onWheel, { passive: false });
   viewport.addEventListener('keydown', onCapKeyDown);
+  viewport.addEventListener('focusin', onFocusIn);
   window.addEventListener('resize', resize);
   window.addEventListener('keydown', onKeyDown);
 
   return () => {
-    cancelAnimationFrame(raf);
+    stopAnimation();
+    cancelAnimationFrame(wheelRaf);
+    delete root.dataset.canvasInit;
+    viewport.removeEventListener('mousedown', onMouseDown, true);
     viewport.removeEventListener('pointerdown', onPointerDown);
     viewport.removeEventListener('pointermove', onPointerMove);
     viewport.removeEventListener('pointerup', endDrag);
     viewport.removeEventListener('pointercancel', endDrag);
     viewport.removeEventListener('wheel', onWheel);
     viewport.removeEventListener('keydown', onCapKeyDown);
+    viewport.removeEventListener('focusin', onFocusIn);
     window.removeEventListener('resize', resize);
     window.removeEventListener('keydown', onKeyDown);
   };

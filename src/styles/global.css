@@ -32,19 +32,6 @@
     }
   }
 
-  img.nav-logo {
-    width: auto;
-    max-width: min(42vw, 9rem);
-    height: var(--nav-logo-h);
-    max-height: var(--nav-logo-h);
-  }
-
-  @media (min-width: 768px) {
-    img.nav-logo {
-      max-width: 10.5rem;
-    }
-  }
-
   html {
     @apply antialiased;
   }

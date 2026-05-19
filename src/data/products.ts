@@ -200,13 +200,6 @@ export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
 }
 
-export const capImages = [
-  { file: 'navy-trucker.png', alt: 'Gorra trucker azul marino' },
-  { file: 'beige-vintage.png', alt: 'Gorra beige estilo vintage' },
-  { file: 'white-minimal.png', alt: 'Gorra blanca minimalista' },
-  { file: 'black-baseball.png', alt: 'Gorra negra tipo baseball' },
-] as const;
-
 /** Genera muchas posiciones en una malla con espaciado y límites naturales. */
 export function buildCapPlacements() {
   const COLS = 14;
@@ -239,7 +232,6 @@ export function buildCapPlacements() {
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const isCenter = row === CENTER_ROW && col === CENTER_COL;
-      const img = capImages[index % capImages.length];
       const product = isCenter && featured ? featured : products[index % products.length];
       const x =
         ORIGIN_X + col * CELL_W + (row % 2 === 1 ? STAGGER_X : 0) + ((index * 17) % 24) - 12;
@@ -253,8 +245,8 @@ export function buildCapPlacements() {
         y,
         w: isFeatured ? HAT_W + 24 : HAT_W,
         h: isFeatured ? HAT_H + 24 : HAT_H,
-        image: isFeatured && featured ? featured.image : `/images/caps/${img.file}`,
-        alt: isFeatured ? `${product.name} — vista frontal` : `${product.name} — ${img.alt}`,
+        image: product.image,
+        alt: isFeatured ? `${product.name} — vista frontal` : `${product.name} — vista general`,
         featured: isFeatured,
       });
       index++;

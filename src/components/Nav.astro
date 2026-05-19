@@ -160,6 +160,9 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
 <style>
   .nav-root {
     --nav-side-h: calc(var(--nav-logo-h) * 0.8);
+    --nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+    --nav-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --nav-duration: 360ms;
   }
 
   .nav-bar {
@@ -366,11 +369,7 @@ const whatsappComprar = whatsappUrl(WHATSAPP_PRIMARY, WHATSAPP_NAV_MESSAGE);
     }
   }
 
-  .nav-root {
-    --nav-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
-    --nav-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-    --nav-duration: 360ms;
-  }
+
 
   /* Hamburguesa → X */
   .nav-hamburger {

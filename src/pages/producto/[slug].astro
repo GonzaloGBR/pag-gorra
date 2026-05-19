@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import { products } from '../../data/products';
+import {
+  whatsappUrl,
+  WHATSAPP_PRIMARY,
+  productWhatsAppMessage,
+} from '../../lib/whatsapp';
+
+export function getStaticPaths() {
+  return products.map((product) => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+const waMessage = productWhatsAppMessage(product.name, product.price, product.currency);
+const waPrimary = whatsappUrl(WHATSAPP_PRIMARY, waMessage);
+---
+
+<BaseLayout title={`${product.name} — MLCAPS`} bodyClass="pt-[5rem] md:pt-[5.25rem]">
+  <Nav backHref="/" />
+
+  <main
+    class="mx-auto max-w-[1440px] px-margin-mobile py-6 sm:py-8 md:px-margin-desktop md:py-section-gap"
+  >
+    <div class="grid grid-cols-1 items-start gap-8 md:gap-12 lg:grid-cols-2 lg:gap-[48px]">
+      <div
+        class="flex h-[50vh] min-h-[280px] w-full items-center justify-center bg-canvas sm:h-[55vh] lg:sticky lg:top-24 lg:h-[80vh]"
+      >
+        <img
+          src={product.image}
+          alt={product.name}
+          class="h-full w-full object-contain p-4 sm:p-8"
+          width="800"
+          height="800"
+        />
+      </div>
+
+      <div class="flex flex-col gap-8 md:gap-12 lg:pt-0">
+        <div class="flex flex-col gap-3 border-b border-hairline pb-6 md:gap-4 md:pb-8">
+          <h1
+            class="font-display-hero text-display-hero leading-none tracking-tighter text-ink"
+          >
+            {product.name}
+          </h1>
+          <p class="font-headline-md text-ink">
+            ${product.price.toFixed(2)} {product.currency}
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3 border-b border-hairline pb-8">
+          <a
+            href={waPrimary}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-button-text flex min-h-12 w-full items-center justify-center rounded-full bg-ink px-8 py-4 uppercase tracking-widest text-canvas transition-all duration-150 hover:scale-[0.98] hover:opacity-80"
+          >
+            Comprar por WhatsApp
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8">
+          <div>
+            <h2 class="font-label-caps mb-4 tracking-widest text-ink">Description</h2>
+            <p class="font-body-lg leading-relaxed text-secondary">
+              {product.description}
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-8 border-t border-hairline pt-8 sm:grid-cols-2">
+            <div>
+              <h2 class="font-label-caps mb-4 tracking-widest text-ink">Materials</h2>
+              <ul class="font-body-lg flex flex-col gap-2 text-secondary">
+                {product.materials.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+            <div>
+              <h2 class="font-label-caps mb-4 tracking-widest text-ink">Care</h2>
+              <ul class="font-body-lg flex flex-col gap-2 text-secondary">
+                {product.care.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

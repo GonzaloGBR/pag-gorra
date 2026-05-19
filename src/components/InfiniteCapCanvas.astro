@@ -1,0 +1,97 @@
+---
+import { buildCapPlacements } from '../data/products';
+import { computeWorldBounds } from '../lib/infinite-canvas';
+
+const placements = buildCapPlacements();
+const bounds = computeWorldBounds(placements);
+const worldW = bounds.maxX - bounds.minX;
+const worldH = bounds.maxY - bounds.minY;
+---
+
+<section
+  id="infinite-canvas"
+  class="infinite-canvas fixed inset-0 z-0 overflow-hidden bg-canvas"
+  aria-label="Catálogo infinito de gorras"
+>
+  <div
+    class="canvas-hint pointer-events-none absolute bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] left-1/2 z-20 max-w-[min(88vw,20rem)] -translate-x-1/2 rounded-full border border-hairline bg-canvas/90 px-3.5 py-2 text-center font-label-caps text-[0.625rem] leading-snug tracking-wide text-secondary backdrop-blur-sm sm:bottom-6 sm:max-w-none sm:px-5 sm:py-2.5 sm:text-xs"
+  >
+    <span class="sm:hidden">Arrastra · toca una gorra</span>
+    <span class="hidden sm:inline"
+      >Arrastra en cualquier dirección · clic en una gorra para ver detalle</span
+    >
+  </div>
+
+  <div
+    data-viewport
+    class="canvas-viewport h-full min-h-screen w-full cursor-grab touch-none select-none active:cursor-grabbing"
+  >
+    <div
+      data-world
+      class="canvas-world relative will-change-transform"
+      style={`width: ${worldW}px; height: ${worldH}px;`}
+    >
+      {
+        placements.map((cap) => (
+          <div
+            data-cap-item
+            data-slug={cap.slug}
+            role="link"
+            tabindex="0"
+            class="cap-item group absolute block cursor-pointer bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+            style={`left: ${cap.x}px; top: ${cap.y}px; width: ${cap.w}px; height: ${cap.h}px;`}
+            aria-label={`Ver ${cap.alt}`}
+          >
+            <div class="cap-item__visual h-full w-full">
+              <img
+                src={cap.image}
+                alt={cap.alt}
+                width={cap.w}
+                height={cap.h}
+                class="pointer-events-none h-full w-full object-contain"
+                loading="lazy"
+                draggable="false"
+              />
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initInfiniteCanvas } from '../lib/infinite-canvas';
+  import { buildCapPlacements } from '../data/products';
+
+  const root = document.getElementById('infinite-canvas');
+  if (root) {
+    const placements = buildCapPlacements();
+    const cleanup = initInfiniteCanvas(root, placements);
+    document.addEventListener('astro:before-swap', cleanup, { once: true });
+  }
+</script>
+
+<style>
+  .cap-item {
+    z-index: 1;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .cap-item:hover,
+  .cap-item:focus-visible {
+    z-index: 10;
+  }
+
+  .cap-item__visual {
+    transform-origin: center center;
+    transition: transform 0.25s ease;
+    will-change: transform;
+  }
+
+  .cap-item:hover .cap-item__visual,
+  .cap-item:focus-visible .cap-item__visual {
+    transform: scale(1.12);
+  }
+</style>

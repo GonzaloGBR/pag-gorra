@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import InfiniteCapCanvas from '../components/InfiniteCapCanvas.astro';
+---
+
+<BaseLayout
+  title="MLCAPS — Exploración infinita"
+  description="Explora gorras en todas direcciones. Sin vacío: solo catálogo."
+  bodyClass="overflow-hidden"
+>
+  <Nav active="coleccion" />
+  <InfiniteCapCanvas />
+</BaseLayout>
